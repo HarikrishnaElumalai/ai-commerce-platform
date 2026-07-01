@@ -39,6 +39,61 @@ services:
 
     networks:
       - odin-network
+  
+  portainer:
+    image: portainer/portainer-ce:${PORTAINER_VERSION}
+    container_name: odin-portainer
+
+    restart: unless-stopped
+
+    ports:
+      - "${PORTAINER_PORT}:9000"
+
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - odin-portainer-data:/data
+
+    networks:
+      - odin-network
+  
+  
+  n8n:
+    image: n8nio/n8n:${N8N_VERSION}
+    container_name: odin-n8n
+
+    restart: unless-stopped
+
+    env_file:
+      - .env
+
+    environment:
+      DB_TYPE: postgresdb
+      DB_POSTGRESDB_HOST: odin-postgres
+      DB_POSTGRESDB_PORT: 5432
+      DB_POSTGRESDB_DATABASE: ${POSTGRES_DB}
+      DB_POSTGRESDB_USER: ${POSTGRES_USER}
+      DB_POSTGRESDB_PASSWORD: ${POSTGRES_PASSWORD}
+
+      N8N_BASIC_AUTH_ACTIVE: ${N8N_BASIC_AUTH_ACTIVE}
+      N8N_BASIC_AUTH_USER: ${N8N_BASIC_AUTH_USER}
+      N8N_BASIC_AUTH_PASSWORD: ${N8N_BASIC_AUTH_PASSWORD}
+
+      N8N_HOST: ${N8N_HOST}
+      N8N_PROTOCOL: ${N8N_PROTOCOL}
+      WEBHOOK_URL: ${WEBHOOK_URL}
+      TZ: ${TZ}
+
+    ports:
+      - "${N8N_PORT}:5678"
+
+    volumes:
+      - odin-n8n-data:/home/node/.n8n
+
+    depends_on:
+      - postgres
+
+    networks:
+      - odin-network
 
 networks:
   odin-network:
@@ -47,4 +102,5 @@ networks:
 volumes:
   odin-postgres-data:
   odin-redis-data:
-
+  odin-portainer-data:
+  odin-n8n-data:
