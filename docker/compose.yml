@@ -23,6 +23,22 @@ services:
     networks:
       - odin-network
 
+  redis:
+    image: redis:${REDIS_VERSION}
+    container_name: odin-redis
+
+    restart: unless-stopped
+
+    command: redis-server --appendonly yes
+
+    ports:
+      - "${REDIS_PORT}:6379"
+
+    volumes:
+      - odin-redis-data:/data
+
+    networks:
+      - odin-network
 
 networks:
   odin-network:
@@ -30,4 +46,5 @@ networks:
 
 volumes:
   odin-postgres-data:
+  odin-redis-data:
 
